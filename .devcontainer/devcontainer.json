@@ -1,0 +1,30 @@
+{
+  "name": "crypto-pipeline",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/aws-cli:1": {},
+    "ghcr.io/devcontainers/features/terraform:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "pip install --upgrade pip && pip install snowflake-cli-labs",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "hashicorp.terraform"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "AWS_ACCESS_KEY_ID": "${localEnv:AWS_ACCESS_KEY_ID}",
+    "AWS_SECRET_ACCESS_KEY": "${localEnv:AWS_SECRET_ACCESS_KEY}",
+    "AWS_DEFAULT_REGION": "${localEnv:AWS_DEFAULT_REGION}",
+    "SNOWFLAKE_ACCOUNT": "${localEnv:SNOWFLAKE_ACCOUNT}",
+    "SNOWFLAKE_USER": "${localEnv:SNOWFLAKE_USER}",
+    "SNOWFLAKE_PASSWORD": "${localEnv:SNOWFLAKE_PASSWORD}",
+    "SNOWFLAKE_ROLE": "${localEnv:SNOWFLAKE_ROLE}",
+    "SNOWFLAKE_WAREHOUSE": "${localEnv:SNOWFLAKE_WAREHOUSE}"
+  }
+}
