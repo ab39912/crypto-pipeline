@@ -1,0 +1,44 @@
+cat > pyproject.toml << 'EOF'
+[project]
+name = "crypto-pipeline"
+version = "0.1.0"
+description = "Crypto market intelligence pipeline on Snowflake"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32.0",
+    "boto3>=1.34.0",
+    "python-dateutil>=2.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+    "moto[s3]>=5.0.0",
+    "responses>=0.25.0",
+]
+snowpark = [
+    "snowflake-snowpark-python>=1.20.0",
+    "snowflake-connector-python>=3.10.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["ingestion*", "snowpark*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["ingestion/tests", "snowpark/tests"]
+addopts = "-v --cov=ingestion --cov=snowpark --cov-report=term-missing"
+EOF
