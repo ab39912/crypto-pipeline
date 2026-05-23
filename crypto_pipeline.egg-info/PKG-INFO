@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: crypto-pipeline
+Version: 0.1.0
+Summary: Crypto market intelligence pipeline on Snowflake
+Requires-Python: >=3.11
+Requires-Dist: requests>=2.32.0
+Requires-Dist: boto3>=1.34.0
+Requires-Dist: python-dateutil>=2.9.0
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0.0; extra == "dev"
+Requires-Dist: ruff>=0.5.0; extra == "dev"
+Requires-Dist: mypy>=1.10.0; extra == "dev"
+Requires-Dist: moto[s3]>=5.0.0; extra == "dev"
+Requires-Dist: responses>=0.25.0; extra == "dev"
+Provides-Extra: snowpark
+Requires-Dist: snowflake-snowpark-python>=1.20.0; extra == "snowpark"
+Requires-Dist: snowflake-connector-python>=3.10.0; extra == "snowpark"

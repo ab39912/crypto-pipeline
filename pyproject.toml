@@ -1,4 +1,3 @@
-cat > pyproject.toml << 'EOF'
 [project]
 name = "crypto-pipeline"
 version = "0.1.0"
@@ -41,4 +40,3 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "SIM"]
 [tool.pytest.ini_options]
 testpaths = ["ingestion/tests", "snowpark/tests"]
 addopts = "-v --cov=ingestion --cov=snowpark --cov-report=term-missing"
-EOF
