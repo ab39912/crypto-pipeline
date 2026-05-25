@@ -48,6 +48,8 @@ See [docs/architecture.md](docs/architecture.md) for the architecture diagram.
 ---
 
 ## Repo structure
+
+```text
 crypto-pipeline/
 ├── ingestion/                 # Python ingestion + Lambda handlers
 │   ├── binance.py
@@ -67,8 +69,7 @@ crypto-pipeline/
 │   ├── ci.yml                 # lint + tests + validate on every push
 │   └── deploy.yml             # terraform apply + schemachange on main
 └── docs/architecture.md       # Mermaid architecture diagram
-
----
+```
 
 ## Sample queries
 
