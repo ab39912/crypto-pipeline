@@ -10,9 +10,7 @@ def flatten_market_ticks(session: Session) -> str:
     Idempotent: MERGE skips rows that already exist on (symbol, exchange, event_ts).
     """
     # Count what's in the stream — if zero, exit fast
-    count_df = session.sql(
-        "SELECT COUNT(*) AS C FROM CRYPTO_DEV.RAW.STREAM_MARKET_TICKS"
-    ).collect()
+    count_df = session.sql("SELECT COUNT(*) AS C FROM CRYPTO_DEV.RAW.STREAM_MARKET_TICKS").collect()
     row_count = count_df[0]["C"]
 
     if row_count == 0:
