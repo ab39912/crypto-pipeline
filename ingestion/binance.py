@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
@@ -28,7 +28,7 @@ def fetch_tickers(symbols: list[str] | None = None, timeout: int = 10) -> list[d
     response.raise_for_status()
 
     data = response.json()
-    fetched_at = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(UTC).isoformat()
     return [{"source": "binance", "fetched_at": fetched_at, "payload": item} for item in data]
 
 
@@ -37,7 +37,7 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     filepath = output_path / f"binance_{ts}.jsonl"
 
     with filepath.open("w") as f:

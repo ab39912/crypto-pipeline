@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import boto3
 
@@ -21,7 +21,7 @@ def write_s3(records: list[dict], source: str, bucket: str | None = None) -> str
     if not bucket:
         raise ValueError("RAW_BUCKET env var not set and no bucket arg provided")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     key = (
         f"raw/{source}/"
         f"year={now.year:04d}/"

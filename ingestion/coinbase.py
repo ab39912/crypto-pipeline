@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import requests
@@ -33,7 +33,7 @@ def fetch_candles(
     response.raise_for_status()
 
     raw_candles = response.json()
-    fetched_at = datetime.now(timezone.utc).isoformat()
+    fetched_at = datetime.now(UTC).isoformat()
 
     records = []
     for candle in raw_candles:
@@ -80,7 +80,7 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
     filepath = output_path / f"coinbase_{ts}.jsonl"
 
     with filepath.open("w") as f:
