@@ -3,11 +3,17 @@ name: Deploy to Dev
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # manual trigger from Actions tab
+  workflow_dispatch:
 
 concurrency:
   group: deploy-dev
   cancel-in-progress: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
 
 jobs:
   terraform:
@@ -16,10 +22,6 @@ jobs:
     outputs:
       raw_bucket: ${{ steps.tf-output.outputs.raw_bucket }}
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       TF_VAR_snowflake_aws_iam_user_arn: ${{ secrets.SNOWFLAKE_AWS_IAM_USER_ARN }}
       TF_VAR_snowflake_external_id: ${{ secrets.SNOWFLAKE_EXTERNAL_ID }}
       TF_VAR_snowpipe_sqs_arn: ${{ secrets.SNOWPIPE_SQS_ARN }}
@@ -68,17 +70,11 @@ jobs:
 
       - name: Get AWS account ID
         id: aws-id
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
         run: |
           ID=$(aws sts get-caller-identity --query Account --output text)
           echo "account_id=$ID" >> $GITHUB_OUTPUT
 
       - name: Run schemachange
-        env:
-          SNOWFLAKE_PRIVATE_KEY_PATH: .keys/snowflake_key.p8
         run: |
           schemachange deploy \
             --snowflake-account "${{ secrets.SNOWFLAKE_ACCOUNT }}" \
