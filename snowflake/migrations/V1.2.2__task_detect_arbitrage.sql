@@ -1,0 +1,19 @@
+USE DATABASE CRYPTO_DEV;
+USE SCHEMA STAGING;
+USE WAREHOUSE CRYPTO_WH;
+
+-- Step 1: Suspend parent (required before adding child to DAG)
+ALTER TASK CRYPTO_DEV.STAGING.TASK_FLATTEN_MARKET_TICKS SUSPEND;
+
+-- Step 2: Create child task pointing at parent
+CREATE OR REPLACE TASK task_detect_arbitrage
+  WAREHOUSE = CRYPTO_WH
+  AFTER CRYPTO_DEV.STAGING.TASK_FLATTEN_MARKET_TICKS
+AS
+  CALL CRYPTO_DEV.ANALYTICS.SP_DETECT_ARBITRAGE(0.05);
+
+-- Step 3: Resume child (must come before parent in a DAG)
+ALTER TASK CRYPTO_DEV.STAGING.task_detect_arbitrage RESUME;
+
+-- Step 4: Resume root parent to restart the DAG
+ALTER TASK CRYPTO_DEV.STAGING.TASK_FLATTEN_MARKET_TICKS RESUME;
