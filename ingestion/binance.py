@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+
+from ingestion.s3_writer import write_s3
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +29,6 @@ def fetch_tickers(symbols: list[str] | None = None, timeout: int = 10) -> list[d
 
     data = response.json()
     fetched_at = datetime.now(timezone.utc).isoformat()
-
-    # Enrich each record with ingestion metadata
     return [{"source": "binance", "fetched_at": fetched_at, "payload": item} for item in data]
 
 
@@ -37,7 +38,7 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
     output_path.mkdir(parents=True, exist_ok=True)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    filepath = output_path / f"binance_{ts}.json"
+    filepath = output_path / f"binance_{ts}.jsonl"
 
     with filepath.open("w") as f:
         for record in records:
@@ -50,8 +51,13 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     records = fetch_tickers()
-    filepath = write_local(records)
-    print(f"✅ Wrote {len(records)} records to {filepath}")
+
+    if os.environ.get("RAW_BUCKET"):
+        uri = write_s3(records, source="binance")
+        print(f"✅ Wrote {len(records)} records to {uri}")
+    else:
+        filepath = write_local(records)
+        print(f"✅ Wrote {len(records)} records to {filepath}")
 
 
 if __name__ == "__main__":

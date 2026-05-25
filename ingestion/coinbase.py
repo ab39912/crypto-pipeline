@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
 
+from ingestion.s3_writer import write_s3
+
 logger = logging.getLogger(__name__)
 
 COINBASE_BASE_URL = "https://api.exchange.coinbase.com"
 DEFAULT_PRODUCTS = ["BTC-USD", "ETH-USD", "SOL-USD", "ADA-USD", "DOGE-USD"]
-# Granularity in seconds: 60, 300, 900, 3600, 21600, 86400
-DEFAULT_GRANULARITY = 60  # 1-minute candles
+DEFAULT_GRANULARITY = 60
 
 
 def fetch_candles(
@@ -33,7 +35,6 @@ def fetch_candles(
     raw_candles = response.json()
     fetched_at = datetime.now(timezone.utc).isoformat()
 
-    # Coinbase returns: [time, low, high, open, close, volume]
     records = []
     for candle in raw_candles:
         records.append(
@@ -67,7 +68,7 @@ def fetch_all_products(
             logger.info("Fetching candles for %s", product_id)
             records = fetch_candles(product_id, granularity=granularity)
             all_records.extend(records)
-            time.sleep(0.5)  # be polite — Coinbase public limit is ~10 req/sec
+            time.sleep(0.5)
         except requests.HTTPError:
             logger.exception("Failed to fetch %s", product_id)
 
@@ -80,7 +81,7 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
     output_path.mkdir(parents=True, exist_ok=True)
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    filepath = output_path / f"coinbase_{ts}.json"
+    filepath = output_path / f"coinbase_{ts}.jsonl"
 
     with filepath.open("w") as f:
         for record in records:
@@ -93,8 +94,13 @@ def write_local(records: list[dict], output_dir: str = "./data/raw") -> Path:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     records = fetch_all_products()
-    filepath = write_local(records)
-    print(f"✅ Wrote {len(records)} records to {filepath}")
+
+    if os.environ.get("RAW_BUCKET"):
+        uri = write_s3(records, source="coinbase")
+        print(f"✅ Wrote {len(records)} records to {uri}")
+    else:
+        filepath = write_local(records)
+        print(f"✅ Wrote {len(records)} records to {filepath}")
 
 
 if __name__ == "__main__":
